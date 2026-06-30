@@ -7,6 +7,7 @@ import hpp from 'hpp';
 import { globalLimiter } from './middleware/rateLimiter.middleware.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 import routes from './routes/index.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use(cors({
 // ─────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
 
 // ─────────────────────────────────────────
 // Compression & Logging
