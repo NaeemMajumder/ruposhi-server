@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import slugify from 'slugify';
+import { slugify as translitSlugify } from 'transliteration';
 
 const categorySchema = new mongoose.Schema(
   {
@@ -46,11 +46,14 @@ categorySchema.index({ isActive: 1 });
 categorySchema.index({ parentCategory: 1 });
 
 // ─────────────────────────────────────────
-// Auto generate slug
+// Auto generate slug — Bengali support
 // ─────────────────────────────────────────
 categorySchema.pre('save', function () {
-  if (this.isModified('name')) {
-    this.slug = slugify(this.name, { lower: true, strict: true });
+  if (this.isModified('name') || !this.slug) {
+    this.slug = translitSlugify(this.name, {
+      lowercase: true,
+      separator: '-',
+    });
   }
 });
 
