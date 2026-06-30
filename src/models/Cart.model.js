@@ -48,7 +48,6 @@ cartSchema.virtual('totalItems').get(function () {
   return this.items.reduce((total, item) => total + item.quantity, 0);
 });
 
-cartSchema.index({ user: 1 });
 
 const Cart = mongoose.model('Cart', cartSchema);
 export default Cart;

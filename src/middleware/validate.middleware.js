@@ -5,10 +5,11 @@ const validate = (schema) => (req, res, next) => {
     return next(new AppError('Request body is empty', 400));
   }
 
-  const { error, value } = schema.validate(req.body, {
-    abortEarly: false,
-    stripUnknown: true,
-  });
+const { error, value } = schema.validate(req.body, {
+  abortEarly: false,
+  stripUnknown: true,
+  convert: true, // ✅ এটা আছে কিনা confirm করো
+});
 
   if (error) {
     const messages = error.details.map((d) => d.message).join(', ');

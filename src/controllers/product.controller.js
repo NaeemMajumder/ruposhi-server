@@ -63,10 +63,39 @@ export const getFlashSaleProducts = catchAsync(async (req, res) => {
 // Create Product (Admin)
 // ─────────────────────────────────────────
 export const createProduct = catchAsync(async (req, res) => {
-  const product = await productService.createProduct(
-    req.body,
-    req.files
-  );
+  const data = { ...req.body };
+
+  // Array parse
+  if (data.sizes && typeof data.sizes === 'string') {
+    try { data.sizes = JSON.parse(data.sizes); }
+    catch { data.sizes = [data.sizes]; }
+  }
+  if (data.colors && typeof data.colors === 'string') {
+    try { data.colors = JSON.parse(data.colors); }
+    catch { data.colors = [data.colors]; }
+  }
+  if (data.tags && typeof data.tags === 'string') {
+    try { data.tags = JSON.parse(data.tags); }
+    catch { data.tags = [data.tags]; }
+  }
+
+  // Number parse
+  if (data.price) data.price = Number(data.price);
+  if (data.discountPrice) data.discountPrice = Number(data.discountPrice);
+  if (data.stock) data.stock = Number(data.stock);
+
+  // ✅ Slug manually generate করো
+  const hasBengali = /[\u0980-\u09FF]/.test(data.name || '');
+  if (hasBengali) {
+    const timestamp = Date.now().toString().slice(-6);
+    data.slug = `product-${timestamp}`;
+  } else {
+    const { default: slugify } = await import('slugify');
+    data.slug = slugify(data.name || '', { lower: true, strict: true });
+  }
+
+  const product = await productService.createProduct(data, req.files);
+
   res.status(201).json({
     success: true,
     message: 'Product created successfully',

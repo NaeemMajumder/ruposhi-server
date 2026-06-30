@@ -1,18 +1,18 @@
-import Product from '../models/Product.model.js';
+import Product from "../models/Product.model.js";
 
 const productRepository = {
   findAll: async (filter = {}, options = {}) => {
     const {
-      sort = '-createdAt',
+      sort = "-createdAt",
       skip = 0,
       limit = 12,
-      populate = 'category',
-      select = '-__v',
+      populate = "category",
+      select = "-__v",
     } = options;
 
     const [products, total] = await Promise.all([
       Product.find(filter)
-        .populate(populate, 'name slug')
+        .populate(populate, "name slug")
         .select(select)
         .sort(sort)
         .skip(skip)
@@ -24,36 +24,38 @@ const productRepository = {
   },
 
   findBySlug: async (slug) => {
-    return await Product.findOne({ slug, isActive: true })
-      .populate('category', 'name slug');
+    return await Product.findOne({ slug, isActive: true }).populate(
+      "category",
+      "name slug",
+    );
   },
 
   findById: async (id) => {
-    return await Product.findById(id).populate('category', 'name slug');
+    return await Product.findById(id).populate("category", "name slug");
   },
 
   findFeatured: async (limit = 8) => {
     return await Product.find({ isActive: true, isFeatured: true })
-      .populate('category', 'name slug')
-      .sort('-createdAt')
+      .populate("category", "name slug")
+      .sort("-createdAt")
       .limit(limit);
   },
 
   findNewArrivals: async (limit = 8) => {
     return await Product.find({ isActive: true, isNewArrival: true })
-      .populate('category', 'name slug')
-      .sort('-createdAt')
+      .populate("category", "name slug")
+      .sort("-createdAt")
       .limit(limit);
   },
 
   findFlashSale: async (limit = 8) => {
     return await Product.find({
       isActive: true,
-      'flashSale.isActive': true,
-      'flashSale.endTime': { $gt: new Date() },
+      "flashSale.isActive": true,
+      "flashSale.endTime": { $gt: new Date() },
     })
-      .populate('category', 'name slug')
-      .sort('-createdAt')
+      .populate("category", "name slug")
+      .sort("-createdAt")
       .limit(limit);
   },
 
@@ -63,19 +65,23 @@ const productRepository = {
       _id: { $ne: productId },
       isActive: true,
     })
-      .populate('category', 'name slug')
+      .populate("category", "name slug")
       .limit(limit);
   },
 
   create: async (data) => {
-    return await Product.create(data);
+    // Product.create() এর বদলে new + save() use করো
+    // এতে pre save hook guarantee trigger হবে
+    const product = new Product(data);
+    await product.save();
+    return product;
   },
 
   updateById: async (id, data) => {
     return await Product.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
-    }).populate('category', 'name slug');
+    }).populate("category", "name slug");
   },
 
   deleteById: async (id) => {
@@ -86,7 +92,7 @@ const productRepository = {
     return await Product.findByIdAndUpdate(
       id,
       { $inc: { stock: -quantity, totalSold: quantity } },
-      { new: true }
+      { new: true },
     );
   },
 

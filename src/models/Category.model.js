@@ -42,18 +42,16 @@ const categorySchema = new mongoose.Schema(
 // ─────────────────────────────────────────
 // Indexes
 // ─────────────────────────────────────────
-categorySchema.index({ slug: 1 });
 categorySchema.index({ isActive: 1 });
 categorySchema.index({ parentCategory: 1 });
 
 // ─────────────────────────────────────────
 // Auto generate slug
 // ─────────────────────────────────────────
-categorySchema.pre('save', function (next) {
+categorySchema.pre('save', function () {
   if (this.isModified('name')) {
     this.slug = slugify(this.name, { lower: true, strict: true });
   }
-  next();
 });
 
 const Category = mongoose.model('Category', categorySchema);

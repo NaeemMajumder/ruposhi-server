@@ -95,19 +95,17 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ user: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ paymentStatus: 1 });
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ createdAt: -1 });
 
 // ─────────────────────────────────────────
 // Auto generate order number
 // ─────────────────────────────────────────
-orderSchema.pre('save', async function (next) {
+orderSchema.pre('save', async function () {
   if (!this.orderNumber) {
     const timestamp = Date.now().toString().slice(-8);
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     this.orderNumber = `RP${timestamp}${random}`;
   }
-  next();
 });
 
 const Order = mongoose.model('Order', orderSchema);

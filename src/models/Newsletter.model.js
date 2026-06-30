@@ -22,7 +22,6 @@ const newsletterSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-newsletterSchema.index({ email: 1 });
 newsletterSchema.index({ isActive: 1 });
 
 const Newsletter = mongoose.model('Newsletter', newsletterSchema);
