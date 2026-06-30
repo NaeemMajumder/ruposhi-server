@@ -1,7 +1,11 @@
 import AppError from '../utils/AppError.js';
 
 const validate = (schema) => (req, res, next) => {
-  const { error } = schema.validate(req.body, {
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return next(new AppError('Request body is empty', 400));
+  }
+
+  const { error, value } = schema.validate(req.body, {
     abortEarly: false,
     stripUnknown: true,
   });
@@ -11,6 +15,7 @@ const validate = (schema) => (req, res, next) => {
     return next(new AppError(messages, 400));
   }
 
+  req.body = value;
   next();
 };
 
