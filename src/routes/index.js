@@ -6,6 +6,7 @@ import cartRoutes from './cart.routes.js';
 import orderRoutes from './order.routes.js';
 import userRoutes from './user.routes.js';
 import couponRoutes from './coupon.routes.js';
+import reviewRoutes from './review.routes.js';
 
 const router = Router();
 
@@ -16,11 +17,11 @@ router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.use('/users', userRoutes);
 router.use('/coupons', couponRoutes);
+router.use('/reviews', reviewRoutes);
 
 
 
 // বাকি routes পরে add হবে
-// router.use('/reviews', reviewRoutes);
 // router.use('/payment', paymentRoutes);
 // router.use('/admin', adminRoutes);
 
