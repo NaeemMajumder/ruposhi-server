@@ -51,15 +51,20 @@ const userRepository = {
   },
 
   blockUser: async (id, isBlocked) => {
-    return await User.findByIdAndUpdate(id, { isBlocked }, { new: true });
+    return await User.findByIdAndUpdate(
+      id,
+      { isBlocked },
+      { new: true }
+    );
   },
 
+  // ✅ নতুন methods
   addToWishlist: async (userId, productId) => {
     return await User.findByIdAndUpdate(
       userId,
       { $addToSet: { wishlist: productId } },
       { new: true }
-    );
+    ).populate('wishlist', 'name slug images price discountPrice');
   },
 
   removeFromWishlist: async (userId, productId) => {
@@ -67,7 +72,54 @@ const userRepository = {
       userId,
       { $pull: { wishlist: productId } },
       { new: true }
+    ).populate('wishlist', 'name slug images price discountPrice');
+  },
+
+  getWishlist: async (userId) => {
+    return await User.findById(userId)
+      .populate('wishlist', 'name slug images price discountPrice stock isActive ratings');
+  },
+
+  addAddress: async (userId, address) => {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $push: { addresses: address } },
+      { new: true }
     );
+  },
+
+  updateAddress: async (userId, addressId, data) => {
+    return await User.findOneAndUpdate(
+      { _id: userId, 'addresses._id': addressId },
+      { $set: { 'addresses.$': { ...data, _id: addressId } } },
+      { new: true }
+    );
+  },
+
+  deleteAddress: async (userId, addressId) => {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $pull: { addresses: { _id: addressId } } },
+      { new: true }
+    );
+  },
+
+  setDefaultAddress: async (userId, addressId) => {
+    // সব address এর isDefault false করো
+    await User.updateOne(
+      { _id: userId },
+      { $set: { 'addresses.$[].isDefault': false } }
+    );
+    // Selected address এর isDefault true করো
+    return await User.findOneAndUpdate(
+      { _id: userId, 'addresses._id': addressId },
+      { $set: { 'addresses.$.isDefault': true } },
+      { new: true }
+    );
+  },
+
+  countDocuments: async (filter = {}) => {
+    return await User.countDocuments(filter);
   },
 };
 
