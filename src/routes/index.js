@@ -10,7 +10,7 @@ import reviewRoutes from './review.routes.js';
 import paymentRoutes from './payment.routes.js';
 import testimonialRoutes from './testimonial.routes.js';
 import newsletterRoutes from './newsletter.routes.js';
-
+import adminRoutes from './admin.routes.js';
 
 const router = Router();
 
@@ -25,9 +25,6 @@ router.use('/reviews', reviewRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/testimonials', testimonialRoutes);
 router.use('/newsletter', newsletterRoutes);
-
-
-// বাকি routes পরে add হবে
-// router.use('/admin', adminRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;
