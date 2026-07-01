@@ -7,6 +7,9 @@ import orderRoutes from './order.routes.js';
 import userRoutes from './user.routes.js';
 import couponRoutes from './coupon.routes.js';
 import reviewRoutes from './review.routes.js';
+import paymentRoutes from './payment.routes.js';
+import testimonialRoutes from './testimonial.routes.js';
+
 
 const router = Router();
 
@@ -18,11 +21,12 @@ router.use('/orders', orderRoutes);
 router.use('/users', userRoutes);
 router.use('/coupons', couponRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/payment', paymentRoutes);
+router.use('/testimonials', testimonialRoutes);
 
 
 
 // বাকি routes পরে add হবে
-// router.use('/payment', paymentRoutes);
 // router.use('/admin', adminRoutes);
 
 export default router;
