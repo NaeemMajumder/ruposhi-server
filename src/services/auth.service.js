@@ -28,14 +28,15 @@ const sendOTP = async (contact, purpose) => {
   const isEmail = contact.includes('@');
 
   if (isEmail) {
+    // ✅ Email OTP
     await sendOTPEmail(contact, otp, purpose);
   } else {
-    console.log(`\n📱 OTP [${purpose}] for ${contact}: ${otp}\n`);
+    // ✅ SMS OTP
+    await sendOTPSMS(contact, otp);
   }
 
   return { message: `OTP sent to ${isEmail ? 'email' : 'phone'}` };
 };
-
 
 // ─────────────────────────────────────────
 // Verify OTP
