@@ -1,6 +1,6 @@
-import axios from 'axios';
-import orderRepository from '../repositories/order.repository.js';
-import AppError from '../utils/AppError.js';
+import axios from "axios";
+import orderRepository from "../repositories/order.repository.js";
+import AppError from "../utils/AppError.js";
 
 const BKASH_BASE_URL = process.env.BKASH_BASE_URL;
 const BKASH_APP_KEY = process.env.BKASH_APP_KEY;
@@ -23,18 +23,18 @@ const getBkashToken = async () => {
         headers: {
           username: BKASH_USERNAME,
           password: BKASH_PASSWORD,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
-    if (response.data.statusCode !== '0000') {
-      throw new AppError('Failed to get bKash token', 500);
+    if (response.data.statusCode !== "0000") {
+      throw new AppError("Failed to get bKash token", 500);
     }
 
     return response.data.id_token;
   } catch (error) {
-    throw new AppError('bKash token generation failed', 500);
+    throw new AppError("bKash token generation failed", 500);
   }
 };
 
@@ -43,43 +43,59 @@ const getBkashToken = async () => {
 // ─────────────────────────────────────────
 const createPayment = async (orderId, amount, callbackUrl) => {
   const order = await orderRepository.findById(orderId);
-  if (!order) throw new AppError('Order not found', 404);
+  if (!order) throw new AppError("Order not found", 404);
 
-  if (order.paymentMethod !== 'bkash') {
-    throw new AppError('This order does not support bKash payment', 400);
+  if (order.paymentMethod !== "bkash") {
+    throw new AppError("This order does not support bKash payment", 400);
   }
 
-  if (order.paymentStatus === 'paid') {
-    throw new AppError('This order is already paid', 400);
+  if (order.paymentStatus === "paid") {
+    throw new AppError("This order is already paid", 400);
   }
 
+  // ✅ Mock — Development
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      `\n💳 Mock bKash Payment: Order ${order.orderNumber} — ৳${amount}\n`,
+    );
+    return {
+      paymentID: `MOCK_${Date.now()}`,
+      bkashURL: `${process.env.CLIENT_URL}/payment/mock?orderId=${orderId}&amount=${amount}`,
+      successCallbackURL: `${process.env.CLIENT_URL}/payment/success`,
+      failureCallbackURL: `${process.env.CLIENT_URL}/payment/failed`,
+      cancelledCallbackURL: `${process.env.CLIENT_URL}/payment/cancelled`,
+    };
+  }
+
+  // Production — Real bKash
   const token = await getBkashToken();
 
   try {
     const response = await axios.post(
       `${BKASH_BASE_URL}/tokenized/checkout/create`,
       {
-        mode: '0011',
+        mode: "0011",
         payerReference: orderId.toString(),
-        callbackURL: callbackUrl || `${process.env.CLIENT_URL}/payment/callback`,
+        callbackURL:
+          callbackUrl || `${process.env.CLIENT_URL}/payment/callback`,
         amount: amount.toString(),
-        currency: 'BDT',
-        intent: 'sale',
+        currency: "BDT",
+        intent: "sale",
         merchantInvoiceNumber: order.orderNumber,
       },
       {
         headers: {
           Authorization: token,
-          'X-APP-Key': BKASH_APP_KEY,
-          'Content-Type': 'application/json',
+          "X-APP-Key": BKASH_APP_KEY,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
-    if (response.data.statusCode !== '0000') {
+    if (response.data.statusCode !== "0000") {
       throw new AppError(
-        response.data.statusMessage || 'Payment creation failed',
-        400
+        response.data.statusMessage || "Payment creation failed",
+        400,
       );
     }
 
@@ -92,7 +108,7 @@ const createPayment = async (orderId, amount, callbackUrl) => {
     };
   } catch (error) {
     if (error instanceof AppError) throw error;
-    throw new AppError('bKash payment creation failed', 500);
+    throw new AppError("bKash payment creation failed", 500);
   }
 };
 
@@ -100,12 +116,12 @@ const createPayment = async (orderId, amount, callbackUrl) => {
 // Execute Payment (Callback)
 // ─────────────────────────────────────────
 const executePayment = async (paymentID, status, orderId) => {
-  if (status === 'cancel') {
-    throw new AppError('Payment cancelled by user', 400);
+  if (status === "cancel") {
+    throw new AppError("Payment cancelled by user", 400);
   }
 
-  if (status === 'failure') {
-    throw new AppError('Payment failed', 400);
+  if (status === "failure") {
+    throw new AppError("Payment failed", 400);
   }
 
   const token = await getBkashToken();
@@ -117,16 +133,16 @@ const executePayment = async (paymentID, status, orderId) => {
       {
         headers: {
           Authorization: token,
-          'X-APP-Key': BKASH_APP_KEY,
-          'Content-Type': 'application/json',
+          "X-APP-Key": BKASH_APP_KEY,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
-    if (response.data.statusCode !== '0000') {
+    if (response.data.statusCode !== "0000") {
       throw new AppError(
-        response.data.statusMessage || 'Payment execution failed',
-        400
+        response.data.statusMessage || "Payment execution failed",
+        400,
       );
     }
 
@@ -141,8 +157,8 @@ const executePayment = async (paymentID, status, orderId) => {
     // Order status confirmed করো
     await orderRepository.updateStatus(
       orderId,
-      'confirmed',
-      'Payment received via bKash'
+      "confirmed",
+      "Payment received via bKash",
     );
 
     return {
@@ -153,7 +169,7 @@ const executePayment = async (paymentID, status, orderId) => {
     };
   } catch (error) {
     if (error instanceof AppError) throw error;
-    throw new AppError('Payment execution failed', 500);
+    throw new AppError("Payment execution failed", 500);
   }
 };
 
@@ -170,15 +186,15 @@ const queryPayment = async (paymentID) => {
       {
         headers: {
           Authorization: token,
-          'X-APP-Key': BKASH_APP_KEY,
-          'Content-Type': 'application/json',
+          "X-APP-Key": BKASH_APP_KEY,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
-    throw new AppError('Payment query failed', 500);
+    throw new AppError("Payment query failed", 500);
   }
 };
 
@@ -195,29 +211,26 @@ const refundPayment = async (paymentID, trxID, amount, reason) => {
         paymentID,
         trxID,
         amount: amount.toString(),
-        currency: 'BDT',
+        currency: "BDT",
         reason,
       },
       {
         headers: {
           Authorization: token,
-          'X-APP-Key': BKASH_APP_KEY,
-          'Content-Type': 'application/json',
+          "X-APP-Key": BKASH_APP_KEY,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
-    if (response.data.statusCode !== '0000') {
-      throw new AppError(
-        response.data.statusMessage || 'Refund failed',
-        400
-      );
+    if (response.data.statusCode !== "0000") {
+      throw new AppError(response.data.statusMessage || "Refund failed", 400);
     }
 
     return response.data;
   } catch (error) {
     if (error instanceof AppError) throw error;
-    throw new AppError('Refund failed', 500);
+    throw new AppError("Refund failed", 500);
   }
 };
 
