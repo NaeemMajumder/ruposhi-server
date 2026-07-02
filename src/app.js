@@ -8,6 +8,7 @@ import { globalLimiter } from "./middleware/rateLimiter.middleware.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import routes from "./routes/index.js";
 import cookieParser from "cookie-parser";
+import connectDB from "./config/db.js";
 
 const app = express();
 
@@ -64,6 +65,19 @@ app.use(compression());
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
+// ✅ সব routes এর আগে add করো
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+    });
+  }
+});
 
 // ─────────────────────────────────────────
 // Global Rate Limiter

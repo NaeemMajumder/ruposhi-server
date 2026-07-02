@@ -3,23 +3,22 @@ import mongoose from 'mongoose';
 let isConnected = false;
 
 const connectDB = async () => {
-  if (isConnected) {
-    console.log('✅ Using existing MongoDB connection');
+  if (isConnected && mongoose.connection.readyState === 1) {
     return;
   }
 
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,
+      // ✅ bufferCommands remove করো
     });
 
     isConnected = true;
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    console.log(`📦 Database: ${conn.connection.name}`);
+    console.log(`✅ MongoDB Connected`);
   } catch (error) {
-    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    isConnected = false;
+    console.error(`❌ MongoDB Error: ${error.message}`);
     throw error;
   }
 };
