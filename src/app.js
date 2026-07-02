@@ -1,13 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import morgan from 'morgan';
-import hpp from 'hpp';
-import { globalLimiter } from './middleware/rateLimiter.middleware.js';
-import { errorHandler, notFound } from './middleware/error.middleware.js';
-import routes from './routes/index.js';
-import cookieParser from 'cookie-parser';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import hpp from "hpp";
+import { globalLimiter } from "./middleware/rateLimiter.middleware.js";
+import { errorHandler, notFound } from "./middleware/error.middleware.js";
+import routes from "./routes/index.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -20,9 +20,9 @@ app.use(hpp());
 // Custom NoSQL Injection Sanitizer
 // (express-mongo-sanitize Express 5 এ conflict করে)
 const sanitizeInput = (obj) => {
-  if (obj && typeof obj === 'object') {
+  if (obj && typeof obj === "object") {
     Object.keys(obj).forEach((key) => {
-      if (key.startsWith('$') || key.includes('.')) {
+      if (key.startsWith("$") || key.includes(".")) {
         delete obj[key];
       } else {
         sanitizeInput(obj[key]);
@@ -41,43 +41,50 @@ app.use((req, res, next) => {
 // ─────────────────────────────────────────
 // CORS
 // ─────────────────────────────────────────
-app.use(cors({
-  origin: [
-    process.env.CLIENT_URL,
-    process.env.ADMIN_URL,
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+  cors({
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 // ─────────────────────────────────────────
 // Body Parser
 // ─────────────────────────────────────────
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 // ─────────────────────────────────────────
 // Compression & Logging
 // ─────────────────────────────────────────
 app.use(compression());
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
 }
 
 // ─────────────────────────────────────────
 // Global Rate Limiter
 // ─────────────────────────────────────────
-app.use('/api', globalLimiter);
+app.use("/api", globalLimiter);
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Ruposhi API is running",
+    version: "1.0.0",
+  });
+});
 
 // ─────────────────────────────────────────
 // Health Check
 // ─────────────────────────────────────────
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Ruposhi API is running',
+    message: "Ruposhi API is running",
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
@@ -86,7 +93,7 @@ app.get('/health', (req, res) => {
 // ─────────────────────────────────────────
 // API Routes
 // ─────────────────────────────────────────
-app.use('/api/v1', routes);
+app.use("/api/v1", routes);
 
 // ─────────────────────────────────────────
 // Error Handling

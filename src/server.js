@@ -3,9 +3,6 @@ import app from './app.js';
 import connectDB from './config/db.js';
 import './config/cloudinary.js';
 
-// ─────────────────────────────────────────
-// Import all models — Mongoose register করার জন্য
-// ─────────────────────────────────────────
 import './models/User.model.js';
 import './models/Category.model.js';
 import './models/Product.model.js';
@@ -19,14 +16,9 @@ import './models/Newsletter.model.js';
 
 const PORT = process.env.PORT || 5000;
 
-// ─────────────────────────────────────────
-// DB Connect
-// ─────────────────────────────────────────
-connectDB();
+// ✅ DB Connect — every request এ check করবে
+connectDB().catch(console.error);
 
-// ─────────────────────────────────────────
-// Local Development এ Server Listen
-// ─────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV} mode`);
@@ -35,7 +27,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// ─────────────────────────────────────────
-// Vercel এর জন্য export
-// ─────────────────────────────────────────
 export default app;
