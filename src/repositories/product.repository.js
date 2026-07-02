@@ -99,6 +99,15 @@ const productRepository = {
   countDocuments: async (filter = {}) => {
     return await Product.countDocuments(filter);
   },
+
+  // product.repository.js এ add করো
+
+  bulkAddVideo: async (productIds, videoData) => {
+    return await Product.updateMany(
+      { _id: { $in: productIds } },
+      { $set: { youtubeVideo: videoData } },
+    );
+  },
 };
 
 export default productRepository;

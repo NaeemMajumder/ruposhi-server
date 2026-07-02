@@ -58,6 +58,9 @@ export const createProductSchema = Joi.object({
     startTime: Joi.date().optional(),
     endTime: Joi.date().optional(),
   }).optional(),
+
+  youtubeUrl: Joi.string().uri().optional().allow(""),
+  youtubeTitle: Joi.string().max(100).optional().allow(""),
 });
 
 export const updateProductSchema = Joi.object({
@@ -103,4 +106,7 @@ export const updateProductSchema = Joi.object({
     startTime: Joi.date().optional(),
     endTime: Joi.date().optional(),
   }).optional(),
+
+  youtubeUrl: Joi.string().uri().optional().allow(""),
+  youtubeTitle: Joi.string().max(100).optional().allow(""),
 });

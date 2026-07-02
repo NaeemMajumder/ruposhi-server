@@ -78,6 +78,13 @@ const productSchema = new mongoose.Schema(
       sparse: true,
       trim: true,
     },
+    // youtubeVideo field add করো (array না — single object)
+    youtubeVideo: {
+      url: { type: String, trim: true, default: null },
+      videoId: { type: String, trim: true, default: null },
+      title: { type: String, trim: true, default: null },
+      addedAt: { type: Date },
+    },
     tags: [{ type: String, trim: true, lowercase: true }],
     fabric: { type: String, trim: true },
     careInstructions: { type: String, trim: true },
@@ -146,23 +153,23 @@ productSchema.pre("save", function () {
 // ─────────────────────────────────────────
 // Custom slug generator
 // ─────────────────────────────────────────
-const generateSlug = (name) => {
-  // Bengali text থাকলে timestamp দিয়ে unique slug বানাও
-  const hasBengali = /[\u0980-\u09FF]/.test(name);
+// const generateSlug = (name) => {
+//   // Bengali text থাকলে timestamp দিয়ে unique slug বানাও
+//   const hasBengali = /[\u0980-\u09FF]/.test(name);
 
-  if (hasBengali) {
-    // Bengali name → English transliteration map (basic)
-    const timestamp = Date.now().toString().slice(-6);
-    // slug হবে "product-" + timestamp
-    return `product-${timestamp}`;
-  }
+//   if (hasBengali) {
+//     // Bengali name → English transliteration map (basic)
+//     const timestamp = Date.now().toString().slice(-6);
+//     // slug হবে "product-" + timestamp
+//     return `product-${timestamp}`;
+//   }
 
-  return slugify(name, {
-    lower: true,
-    strict: true,
-    trim: true,
-  });
-};
+//   return slugify(name, {
+//     lower: true,
+//     strict: true,
+//     trim: true,
+//   });
+// };
 
 const Product = mongoose.model("Product", productSchema);
 export default Product;
