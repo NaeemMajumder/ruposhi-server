@@ -21,45 +21,21 @@ const generateOTP = () => {
 // ─────────────────────────────────────────
 // Send OTP (Email or SMS)
 // ─────────────────────────────────────────
-// const sendOTP = async (contact, purpose) => {
-//   const otp = generateOTP();
-
-//   await otpRepository.create({ contact, otp, purpose });
-
-//   const isEmail = contact.includes('@');
-//   if (isEmail) {
-//     await sendOTPEmail(contact, otp, purpose);
-//   } else {
-//     await sendOTPSMS(contact, otp);
-//   }
-
-//   return { message: `OTP sent to ${isEmail ? 'email' : 'phone'}` };
-// };
-
-// Temporary sendOTP function for development and production environments
 const sendOTP = async (contact, purpose) => {
   const otp = generateOTP();
-
   await otpRepository.create({ contact, otp, purpose });
 
-  // Development — console এ দেখাও, email/SMS পাঠাবো না
-  if (process.env.NODE_ENV === "development") {
-    console.log(`\n🔑 OTP [${purpose}] for ${contact}: ${otp}\n`);
-    return {
-      message: `OTP sent to ${contact.includes("@") ? "email" : "phone"}`,
-    };
-  }
+  const isEmail = contact.includes('@');
 
-  // Production — real email/SMS
-  const isEmail = contact.includes("@");
   if (isEmail) {
     await sendOTPEmail(contact, otp, purpose);
   } else {
-    await sendOTPSMS(contact, otp);
+    console.log(`\n📱 OTP [${purpose}] for ${contact}: ${otp}\n`);
   }
 
-  return { message: `OTP sent to ${isEmail ? "email" : "phone"}` };
+  return { message: `OTP sent to ${isEmail ? 'email' : 'phone'}` };
 };
+
 
 // ─────────────────────────────────────────
 // Verify OTP

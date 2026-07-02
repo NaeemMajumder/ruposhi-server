@@ -10,6 +10,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ✅ এই block টা add করো
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ SMTP Error:', error.message);
+  } else {
+    console.log('✅ SMTP Connected — Ready to send emails');
+  }
+});
+
 // ─────────────────────────────────────────
 // Base send function
 // ─────────────────────────────────────────
