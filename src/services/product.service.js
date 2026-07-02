@@ -112,51 +112,51 @@ const getFlashSaleProducts = async (limit) => {
 // ─────────────────────────────────────────
 // Create Product (Admin)
 // ─────────────────────────────────────────
-// const createProduct = async (data, files) => {
-//   // Upload images to Cloudinary
-//   const images = [];
-//   if (files && files.length > 0) {
-//     for (let i = 0; i < files.length; i++) {
-//       const result = await uploadToCloudinary(
-//         files[i].buffer,
-//         'products',
-//         { width: 800, height: 800, crop: 'fill' }
-//       );
-//       images.push({
-//         ...result,
-//         isDefault: i === 0,
-//       });
-//     }
-//   }
-
-//   const product = await productRepository.create({ ...data, images });
-//   return product;
-// };
-
-//Temporary — Cloudinary setup না হওয়া পর্যন্ত
 const createProduct = async (data, files) => {
-  // ─────────────────────────────────────────
-  // Image Upload — Cloudinary ready হলে activate হবে
-  // ─────────────────────────────────────────
+  // Upload images to Cloudinary
   const images = [];
-  const cloudinaryReady =
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name';
-
-  if (files && files.length > 0 && cloudinaryReady) {
+  if (files && files.length > 0) {
     for (let i = 0; i < files.length; i++) {
       const result = await uploadToCloudinary(
         files[i].buffer,
         'products',
         { width: 800, height: 800, crop: 'fill' }
       );
-      images.push({ ...result, isDefault: i === 0 });
+      images.push({
+        ...result,
+        isDefault: i === 0,
+      });
     }
   }
 
   const product = await productRepository.create({ ...data, images });
   return product;
 };
+
+//Temporary — Cloudinary setup না হওয়া পর্যন্ত
+// const createProduct = async (data, files) => {
+//   // ─────────────────────────────────────────
+//   // Image Upload — Cloudinary ready হলে activate হবে
+//   // ─────────────────────────────────────────
+//   const images = [];
+//   const cloudinaryReady =
+//     process.env.CLOUDINARY_CLOUD_NAME &&
+//     process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name';
+
+//   if (files && files.length > 0 && cloudinaryReady) {
+//     for (let i = 0; i < files.length; i++) {
+//       const result = await uploadToCloudinary(
+//         files[i].buffer,
+//         'products',
+//         { width: 800, height: 800, crop: 'fill' }
+//       );
+//       images.push({ ...result, isDefault: i === 0 });
+//     }
+//   }
+
+//   const product = await productRepository.create({ ...data, images });
+//   return product;
+// };
 
 // ─────────────────────────────────────────
 // Update Product (Admin)

@@ -1,16 +1,7 @@
 import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '../config/cloudinary.js';
 import streamifier from 'streamifier';
 import AppError from '../utils/AppError.js';
-
-// ─────────────────────────────────────────
-// Cloudinary Config
-// ─────────────────────────────────────────
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 // ─────────────────────────────────────────
 // Multer — Memory Storage
@@ -30,7 +21,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024,
   },
 });
 
@@ -41,6 +32,8 @@ export const uploadToCloudinary = (buffer, folder, options = {}) => {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       folder: `ruposhi/${folder}`,
+      resource_type: 'image',
+      // ❌ upload_preset remove করো — Signed preset এ লাগে না
       transformation: [
         { quality: 'auto:good' },
         { fetch_format: 'webp' },
@@ -51,7 +44,10 @@ export const uploadToCloudinary = (buffer, folder, options = {}) => {
     const stream = cloudinary.uploader.upload_stream(
       uploadOptions,
       (error, result) => {
-        if (error) return reject(new AppError('Image upload failed', 500));
+        if (error) {
+          console.error('❌ Cloudinary Upload Error:', error);
+          return reject(new AppError(`Image upload failed: ${error.message}`, 500));
+        }
         resolve({
           public_id: result.public_id,
           url: result.secure_url,

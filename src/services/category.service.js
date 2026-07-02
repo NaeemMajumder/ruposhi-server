@@ -1,13 +1,16 @@
-import categoryRepository from '../repositories/category.repository.js';
-import { uploadToCloudinary, deleteFromCloudinary } from '../middleware/upload.middleware.js';
-import AppError from '../utils/AppError.js';
+import categoryRepository from "../repositories/category.repository.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../middleware/upload.middleware.js";
+import AppError from "../utils/AppError.js";
 
 // ─────────────────────────────────────────
 // Get All Categories (flat list)
 // ─────────────────────────────────────────
 const getAllCategories = async (query = {}) => {
   const filter = {};
-  if (query.isActive !== undefined) filter.isActive = query.isActive === 'true';
+  if (query.isActive !== undefined) filter.isActive = query.isActive === "true";
   return await categoryRepository.findAll(filter);
 };
 
@@ -23,7 +26,7 @@ const getCategoryTree = async () => {
 // ─────────────────────────────────────────
 const getCategoryBySlug = async (slug) => {
   const category = await categoryRepository.findBySlug(slug);
-  if (!category) throw new AppError('Category not found', 404);
+  if (!category) throw new AppError("Category not found", 404);
 
   const children = await categoryRepository.findChildren(category._id);
   return { category, children };
@@ -34,7 +37,7 @@ const getCategoryBySlug = async (slug) => {
 // ─────────────────────────────────────────
 const getCategoryById = async (id) => {
   const category = await categoryRepository.findById(id);
-  if (!category) throw new AppError('Category not found', 404);
+  if (!category) throw new AppError("Category not found", 404);
   return category;
 };
 
@@ -42,20 +45,13 @@ const getCategoryById = async (id) => {
 // Create Category (Admin)
 // ─────────────────────────────────────────
 const createCategory = async (data, file) => {
-  // Check duplicate name
   const existing = await categoryRepository.findAll({ name: data.name });
-  if (existing.length > 0) throw new AppError('Category name already exists', 400);
+  if (existing.length > 0)
+    throw new AppError("Category name already exists", 400);
 
-  // Upload image if provided
   if (file) {
-    const cloudinaryReady =
-      process.env.CLOUDINARY_CLOUD_NAME &&
-      process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name';
-
-    if (cloudinaryReady) {
-      const result = await uploadToCloudinary(file.buffer, 'categories');
-      data.image = result;
-    }
+    const result = await uploadToCloudinary(file.buffer, "categories");
+    data.image = result;
   }
 
   return await categoryRepository.create(data);
@@ -66,22 +62,15 @@ const createCategory = async (data, file) => {
 // ─────────────────────────────────────────
 const updateCategory = async (id, data, file) => {
   const category = await categoryRepository.findById(id);
-  if (!category) throw new AppError('Category not found', 404);
+  if (!category) throw new AppError("Category not found", 404);
 
   // Upload new image if provided
   if (file) {
-    const cloudinaryReady =
-      process.env.CLOUDINARY_CLOUD_NAME &&
-      process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name';
-
-    if (cloudinaryReady) {
-      // Delete old image
-      if (category.image?.public_id) {
-        await deleteFromCloudinary(category.image.public_id);
-      }
-      const result = await uploadToCloudinary(file.buffer, 'categories');
-      data.image = result;
+    if (category.image?.public_id) {
+      await deleteFromCloudinary(category.image.public_id);
     }
+    const result = await uploadToCloudinary(file.buffer, "categories");
+    data.image = result;
   }
 
   return await categoryRepository.updateById(id, data);
@@ -92,14 +81,14 @@ const updateCategory = async (id, data, file) => {
 // ─────────────────────────────────────────
 const deleteCategory = async (id) => {
   const category = await categoryRepository.findById(id);
-  if (!category) throw new AppError('Category not found', 404);
+  if (!category) throw new AppError("Category not found", 404);
 
   // Check if has children
   const hasChildren = await categoryRepository.hasChildren(id);
   if (hasChildren) {
     throw new AppError(
-      'Cannot delete category with subcategories. Delete subcategories first.',
-      400
+      "Cannot delete category with subcategories. Delete subcategories first.",
+      400,
     );
   }
 
@@ -107,8 +96,8 @@ const deleteCategory = async (id) => {
   const hasProducts = await categoryRepository.hasProducts(id);
   if (hasProducts) {
     throw new AppError(
-      'Cannot delete category with products. Remove or reassign products first.',
-      400
+      "Cannot delete category with products. Remove or reassign products first.",
+      400,
     );
   }
 
@@ -118,7 +107,7 @@ const deleteCategory = async (id) => {
   }
 
   await categoryRepository.deleteById(id);
-  return { message: 'Category deleted successfully' };
+  return { message: "Category deleted successfully" };
 };
 
 const categoryService = {
